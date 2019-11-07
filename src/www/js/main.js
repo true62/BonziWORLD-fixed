@@ -111,7 +111,8 @@ function setup() {
 		b.cancel();
 		b.runSingleEvent([{
 			type: "text",
-			text: data.text
+			text: data.text,
+			say: data.say || data.text //hello
 		}]);
 	});
 
