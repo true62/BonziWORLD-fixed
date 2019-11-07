@@ -15,6 +15,21 @@ exports.beat = function() {
     });
 };
 
+var stickers = {
+    sad:"so sad",
+    bonzi:"bonzibuddy",
+    host:"host is a bathbomb",
+    spook:"ew im spooky",
+    forehead:"you have a big forehead",
+    ban:"i will ban you so hard right now",
+    flatearth:"this is true and you cant change my opinion loser",
+    swag:"look at my swag",
+    sans:"fuck you",
+    flip:"fuck you",
+    topjej:"toppest jeg",
+    high:"me high [['eI_:_:'Ef]]"
+}
+
 function checkRoomEmpty(room) {
     if (room.users.length != 0) return;
 
@@ -140,6 +155,15 @@ let userCommands = {
         });
     },
     "youtube": function(vidRaw) {
+        if(!this.room.rid.startsWith("js-")){
+            if(vidRaw.includes("\"")){
+                this.room.emit("talk",{
+                    guid: this.guid,
+                    text:"Hey im hacker lol i hack everywhere im so smart and hacky"
+                })
+                return;
+            }
+        }
         var vid = this.private.sanitize ? sanitize(vidRaw) : vidRaw;
         this.room.emit("youtube", {
             guid: this.guid,
@@ -235,6 +259,15 @@ let userCommands = {
         );
         
         this.room.updateUser(this);
+    },
+    "sticker": function(sticker){
+        if(Object.keys(stickers).includes(sticker)){
+            this.room.emit('talk',{
+                text:`<img src="/img/stickers/${sticker}.png">`,
+                say:stickers[sticker],
+                guid:this.guid
+            })
+        }
     }
 };
 
@@ -392,7 +425,7 @@ class User {
                 text: "HEY EVERYONE LOOK AT ME I'M TRYING TO SCREW WITH THE SERVER LMAO"
             };
         }
-
+	if(!data.text) return; //hacks smh
         log.info.log('debug', 'talk', {
             guid: this.guid,
             text: data.text
@@ -400,8 +433,12 @@ class User {
 
         if (typeof data.text == "undefined")
             return;
-
-        let text = this.private.sanitize ? sanitize(data.text) : data.text;
+        let text;
+	if(this.room.rid.startsWith('js-')){
+            text = data.text
+        }else{
+            text = this.private.sanitize ? sanitize(data.text,settingsSantize) : data.text;
+        }
         if ((text.length <= this.room.prefs.char_limit) && (text.length > 0)) {
             this.room.emit('talk', {
                 guid: this.guid,
